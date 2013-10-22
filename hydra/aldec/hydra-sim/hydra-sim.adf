@@ -1,0 +1,35 @@
+[Project]
+Current Flow=Generic
+VCS=0
+version=3
+Current Config=compile
+[Configurations]
+compile=hydra-sim
+[Library]
+hydra-sim=.\hydra-sim\hydra-sim.lib
+[Settings]
+AccessRead=0
+AccessReadWrite=0
+AccessACCB=0
+AccessACCR=0
+AccessReadWriteSLP=0
+AccessReadTopLevel=1
+DisableC=1
+ENABLE_ADV_DATAFLOW=0
+FLOW_TYPE=HDL
+LANGUAGE=VHDL
+REFRESH_FLOW=1
+[LocalVerilogSets]
+EnableSLP=1
+EnableDebug=0
+LibNames=ovi_ice;ice;
+[LocalVhdlSets]
+CompileWithDebug=0
+[$LibMap$]
+hydra-sim=.
+[Files]
+/..\..\..\testbench\hydra_toplevel_tb.v=-1
+/..\..\..\hdl\hydra_toplevel.v=-1
+[Files.Data]
+.\..\..\testbench\hydra_toplevel_tb.v=Verilog Source Code
+.\..\..\hdl\hydra_toplevel.v=Verilog Source Code
