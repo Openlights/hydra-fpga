@@ -3,7 +3,7 @@
  * (c) 2013-2014 Jon Evans <jon@craftyjon.com>
  * Released under the MIT License -- see LICENSE.txt for details.
  *
- * address_generator.v - Memory address generator module
+ * address_generator_tb.v - Testbench for memory address generator module
  */
  
  `timescale 1ns / 1ps
@@ -36,7 +36,7 @@ module address_generator_tb;
     // Clock process
     always #10 clk = !clk;
 
-
+    // Test process
     initial begin
 
         $dumpfile("address_generator_tb.vcd");
@@ -58,6 +58,5 @@ module address_generator_tb;
 
         #500 $finish;
     end
-
 
 endmodule
