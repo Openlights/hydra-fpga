@@ -16,15 +16,18 @@
     addr
     );
 
+    parameter MEM_ADDR_WIDTH = 24;
+
     input clk;
     input rst_n;
 
-    output reg [MEM_ADDR_WIDTH:0] addr;
+    output reg [MEM_ADDR_WIDTH-1:0] addr;
 
     // Address generation process
     always @(posedge clk) begin
         if (rst_n == 1'b0) begin
             // initialize stuff
+            addr = { MEM_ADDR_WIDTH {1'b0} };
         end
         else begin
             // normal operation
