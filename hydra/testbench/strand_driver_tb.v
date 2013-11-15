@@ -55,10 +55,10 @@ module strand_driver_tb;
         $dumpfile("strand_driver_tb.vcd");
         $dumpvars(0, strand_driver_tb);
 
-        #10 rst_n = 0;
-        #10 rst_n = 1;
-        #10 start_frame = 1;
-        #10 start_frame = 0;
+        rst_n = 0;
+        #20 rst_n = 1;
+        #20 start_frame = 1;
+        #20 start_frame = 0;
 
         #500 $finish;
     end

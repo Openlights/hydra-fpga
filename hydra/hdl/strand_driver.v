@@ -56,10 +56,18 @@
 
     // Locals
     reg [7:0] counter;
+    reg [7:0] counter_preset;
     reg [7:0] bit_position;
     reg [2:0] current_state;
     reg [2:0] next_state;
     reg [MEM_DATA_WIDTH-1:0] current_data;
+    reg strand_clk_i;
+    reg strand_data_i;
+    reg busy_i;
+    reg [7:0] bit_position_i;
+    reg [STRAND_PARAM_WIDTH-1:0] current_idx_i;
+
+    wire words_to_decode;
 
     // FSM
     localparam  STATE_IDLE = 3'b000,
@@ -69,16 +77,18 @@
                 STATE_DECODE_2 = 3'b100;
 
     // Output timing
-    localparam  T1H = 8'd12,  // WS2811 1-bit high period
-                T1L = 8'd13,
-                T0H = 8'd5,
-                T0L = 8'd20,
+    localparam  T1H = 8'd120,  // WS2811 1-bit high period
+                T1L = 8'd130,
+                T0H = 8'd50,
+                T0L = 8'd200,
                 TRESET = 8'd255,
-                TCLKDIV2 = 8'd1;
+                TCLKDIV2 = 8'd10;
 
+    // State machine
     always @(posedge clk) begin
         if (rst_n == 1'b0) begin
             current_idx <= { STRAND_PARAM_WIDTH {1'b0} };
+            current_data <= { MEM_DATA_WIDTH {1'b0} };
             busy <= 1'b0;
             done <= 1'b0;
             strand_clk <= 1'b0;
@@ -89,73 +99,112 @@
         end
         else begin
             current_state <= next_state;
+            busy <= busy_i;
+            bit_position <= bit_position_i;
+            current_idx <= current_idx_i;
+
+            strand_clk <= strand_clk_i;
+            strand_data <= strand_data_i;
 
             // Decrement frame counter
             if (counter > 0) begin
                 counter <= counter - 1;
             end
-            else if (counter == 0) begin
-                if (bit_position == 8'd23) begin
-                    current_idx <= current_idx + 1;
-                end
-                else begin
-                    bit_position <= bit_position + 1;
-                end                                
-            end
-
             
             if (current_state == STATE_UNPACK) begin
-                // Reset the bit position counter at the beginning of each word
-                bit_position <= {8 {1'b0} };
-
                 // Latch the new data word
                 current_data <= mem_data;
             end
         end
     end
 
+    assign words_to_decode = (current_idx < strand_length);
+
+    // Next state process
     always @(counter, start_frame, current_idx) begin
         next_state = current_state;
+        strand_data_i = strand_data;
+        strand_clk_i = strand_clk;
+        counter_preset = counter;
+        busy_i = busy;
+        bit_position_i = bit_position;
+        current_idx_i = current_idx;
+
         case (current_state)
             STATE_IDLE: begin
                 // Start transmission
                 if (start_frame == 1'b1) begin
                     next_state = STATE_START;
-                    busy = 1'b1;
-                    current_idx = { STRAND_PARAM_WIDTH {1'b0} };
-                    bit_position = {8 {1'b0} };
+                    busy_i = 1'b1;
+                    current_idx_i = { STRAND_PARAM_WIDTH {1'b0} };
+                    bit_position_i = {8 {1'b0} };
                 end
             end
             STATE_START: begin
                 // Perform any one-time initialization
                 // TODO: does this need to exist?
+                current_idx_i = { STRAND_PARAM_WIDTH {1'b0} };
                 next_state = STATE_UNPACK;
             end
             STATE_UNPACK: begin
                 // Grab the next pixel word
-                if (current_idx < strand_length) begin
+                if (words_to_decode == 1'b1) begin
                     next_state = STATE_DECODE_1;
                 end else begin
                     next_state = STATE_IDLE;
+                    busy_i = 0;
                 end
+
+                // Reset the bit position counter at the beginning of each word
+                bit_position = {8 {1'b0} };
             end
             STATE_DECODE_1: begin
                 // First output phase.
-                // WS2811? D <= 1, T <= (bit==1) ? T1H : T0H
-                // WS2812? D <= bit, C <= 0, T <= TCLKDIV2
-                
+                if (ws2811_mode == 1'b1) begin
+                    // WS2811? D <= 1, T <= (bit==1) ? T1H : T0H
+                    if (mem_data[bit_position] == 1'b1) begin
+                        counter_preset = T1H;
+                    end else begin
+                        counter_preset = T0H;
+                    end
+                    strand_data_i = 1'b1;
+                end else begin
+                    // WS2812? D <= bit, C <= 0, T <= TCLKDIV2
+                    strand_data_i = mem_data[bit_position];
+                    strand_clk_i = 1'b0;
+                    counter_preset = TCLKDIV2;
+                end
+
+                if (counter == 0) begin
+                    next_state = STATE_DECODE_2;
+                end
             end
             STATE_DECODE_2: begin
                 // Second output phase.
                 // WS2811? D <= 0, T <= (bit==1) ? T1L: T0L
                 // WS2812? C <= 0, T <= TCLKDIV2
-                
+                if (ws2811_mode == 1'b1) begin
+                    if (mem_data[bit_position] == 1'b1) begin
+                        counter_preset = T1L;
+                    end else begin
+                        counter_preset = T0L;
+                    end
+                end else begin
+                    // Toggle the clock high; data remains the same
+                    strand_data_i = strand_data;
+                    strand_clk_i = 1'b1;
+                    counter_preset = TCLKDIV2;
+                end
 
                 // Advance the bit index
-                if (bit_position < 8'd23) begin
-                    next_state <= STATE_DECODE_1;
-                end else begin
-                    next_state <= STATE_UNPACK;
+                if (counter == 0) begin
+                    if (bit_position < 8'd23) begin
+                        next_state = STATE_DECODE_1;
+                        bit_position_i = bit_position + 1;
+                    end else begin
+                        next_state = STATE_UNPACK;
+                        current_idx_i = current_idx + 1;
+                    end
                 end
             end
         endcase
