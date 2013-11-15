@@ -121,7 +121,7 @@
     assign words_to_decode = (current_idx < strand_length);
 
     // Next state process
-    always @(counter, start_frame, current_idx) begin
+    always @(*) begin
         next_state = current_state;
         strand_data_i = strand_data;
         strand_clk_i = strand_clk;
