@@ -23,7 +23,7 @@ module strand_driver_tb;
     reg [STRAND_PARAM_WIDTH-1:0] strand_length = 160;
 
     wire [STRAND_PARAM_WIDTH-1:0] current_idx;
-    reg [MEM_DATA_WIDTH-1:0] mem_data = 24'hFF0055;
+    reg [MEM_DATA_WIDTH-1:0] mem_data = 24'b101011001110000110101110;
 
     wire busy;
     wire done;
@@ -60,7 +60,7 @@ module strand_driver_tb;
         #20 start_frame = 1;
         #20 start_frame = 0;
 
-        #500 $finish;
+        #300000 $finish;
     end
 
 endmodule

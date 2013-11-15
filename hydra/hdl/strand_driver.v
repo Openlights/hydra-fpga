@@ -66,8 +66,11 @@
     reg busy_i;
     reg [7:0] bit_position_i;
     reg [STRAND_PARAM_WIDTH-1:0] current_idx_i;
+    reg counter_set_i;
+    reg counter_running;
 
     wire words_to_decode;
+    wire current_bit;
 
     // FSM
     localparam  STATE_IDLE = 3'b000,
@@ -96,29 +99,39 @@
             counter <= {8 {1'b0} };
             bit_position <= {8 {1'b0} };
             current_state <= STATE_IDLE;
+            counter_running <= 1'b0;
         end
         else begin
-            current_state <= next_state;
             busy <= busy_i;
             bit_position <= bit_position_i;
             current_idx <= current_idx_i;
 
             strand_clk <= strand_clk_i;
             strand_data <= strand_data_i;
-
-            // Decrement frame counter
-            if (counter > 0) begin
-                counter <= counter - 1;
-            end
             
+            // Latch the new data word
             if (current_state == STATE_UNPACK) begin
-                // Latch the new data word
                 current_data <= mem_data;
             end
+
+            // Manage the timing counter
+            if (counter_set_i == 1'b1) begin
+                counter <= counter_preset;
+                counter_running <= 1'b1;
+            end else begin
+                if (counter > 0) begin
+                    counter <= counter - 1;
+                end else begin
+                    counter_running <= 1'b0;
+                end
+            end
+
+            current_state <= next_state;
         end
     end
 
     assign words_to_decode = (current_idx < strand_length);
+    assign current_bit = mem_data[bit_position];
 
     // Next state process
     always @(*) begin
@@ -162,7 +175,7 @@
                 // First output phase.
                 if (ws2811_mode == 1'b1) begin
                     // WS2811? D <= 1, T <= (bit==1) ? T1H : T0H
-                    if (mem_data[bit_position] == 1'b1) begin
+                    if (current_bit == 1'b1) begin
                         counter_preset = T1H;
                     end else begin
                         counter_preset = T0H;
@@ -175,7 +188,9 @@
                     counter_preset = TCLKDIV2;
                 end
 
-                if (counter == 0) begin
+                counter_set_i = !counter_running;
+
+                if (counter == 0 && counter_running) begin
                     next_state = STATE_DECODE_2;
                 end
             end
@@ -189,6 +204,7 @@
                     end else begin
                         counter_preset = T0L;
                     end
+                    strand_data_i = 1'b0;
                 end else begin
                     // Toggle the clock high; data remains the same
                     strand_data_i = strand_data;
@@ -197,7 +213,7 @@
                 end
 
                 // Advance the bit index
-                if (counter == 0) begin
+                if (counter == 0 && counter_running) begin
                     if (bit_position < 8'd23) begin
                         next_state = STATE_DECODE_1;
                         bit_position_i = bit_position + 1;
@@ -206,6 +222,8 @@
                         current_idx_i = current_idx + 1;
                     end
                 end
+
+                counter_set_i = !counter_running;
             end
         endcase
     end
