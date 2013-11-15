@@ -1,0 +1,37 @@
+[*]
+[*] GTKWave Analyzer v3.3.40 (w)1999-2012 BSI
+[*] Fri Nov 15 01:08:32 2013
+[*]
+[dumpfile] "/home/jevans/workspace/hydra-fpga/hydra/strand_driver_tb.vcd"
+[dumpfile_mtime] "Fri Nov 15 01:07:59 2013"
+[dumpfile_size] 2226
+[savefile] "/home/jevans/workspace/hydra-fpga/hydra/strand_driver_tb.gtkw"
+[timestart] 0
+[size] 1680 1000
+[pos] -1 -1
+*-14.000000 13680 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] strand_driver_tb.
+[sst_width] 210
+[signals_width] 234
+[sst_expanded] 1
+[sst_vpaned_height] 280
+@28
+strand_driver_tb.clk
+strand_driver_tb.rst_n
+@22
+strand_driver_tb.mem_data[23:0]
+strand_driver_tb.strand_length[15:0]
+@28
+strand_driver_tb.start_frame
+strand_driver_tb.ws2811_mode
+strand_driver_tb.busy
+strand_driver_tb.done
+@22
+strand_driver_tb.current_idx[15:0]
+@28
+strand_driver_tb.strand_clk
+strand_driver_tb.strand_data
+strand_driver_tb.sd_inst.current_state[2:0]
+strand_driver_tb.sd_inst.next_state[2:0]
+[pattern_trace] 1
+[pattern_trace] 0

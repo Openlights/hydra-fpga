@@ -1,0 +1,27 @@
+[*]
+[*] GTKWave Analyzer v3.3.40 (w)1999-2012 BSI
+[*] Mon Oct 28 22:49:46 2013
+[*]
+[dumpfile] "/home/jevans/workspace/hydra-fpga/hydra/address_generator_tb.vcd"
+[dumpfile_mtime] "Mon Oct 28 22:49:03 2013"
+[dumpfile_size] 1735
+[savefile] "/home/jevans/workspace/hydra-fpga/hydra/address_generator_tb.gtkw"
+[timestart] 0
+[size] 1680 1000
+[pos] -1 -1
+*-15.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 210
+[signals_width] 182
+[sst_expanded] 1
+[sst_vpaned_height] 293
+@28
+address_generator_tb.clk
+address_generator_tb.rst_n
+@24
+address_generator_tb.strand_length[15:0]
+address_generator_tb.strand_offset[15:0]
+address_generator_tb.strand_idx[15:0]
+@25
+address_generator_tb.addr[23:0]
+[pattern_trace] 1
+[pattern_trace] 0
