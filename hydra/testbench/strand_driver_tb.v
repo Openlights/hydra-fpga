@@ -17,7 +17,7 @@ module strand_driver_tb;
     reg clk = 0;
     reg rst_n = 1;
 
-    reg ws2811_mode = 1;
+    reg ws2811_mode = 0;
     reg start_frame = 0;
 
     reg [STRAND_PARAM_WIDTH-1:0] strand_length = 160;

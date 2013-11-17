@@ -103,7 +103,6 @@
         end
         else begin
             busy <= busy_i;
-            bit_position <= bit_position_i;
             current_idx <= current_idx_i;
 
             strand_clk <= strand_clk_i;
@@ -112,6 +111,9 @@
             // Latch the new data word
             if (current_state == STATE_UNPACK) begin
                 current_data <= mem_data;
+                bit_position <= {8 {1'b0} };
+            end else begin
+                bit_position <= bit_position_i;
             end
 
             // Manage the timing counter
@@ -157,6 +159,7 @@
                 // Perform any one-time initialization
                 // TODO: does this need to exist?
                 current_idx_i = { STRAND_PARAM_WIDTH {1'b0} };
+                bit_position_i = {8 {1'b0} };
                 next_state = STATE_UNPACK;
             end
             STATE_UNPACK: begin
